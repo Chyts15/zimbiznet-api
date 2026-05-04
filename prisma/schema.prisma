@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Business Profile ──────────────────────────────────────────────────────────
+model Business {
+  id           String   @id @default(cuid())
+  name         String
+  type         String   // farmer, artisan, service_worker, micro_trader, sme
+  phone        String   @unique
+  city         String
+  province     String?
+  description  String?
+  currency     String   @default("USD") // USD or ZiG
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  stockItems      StockItem[]
+  sales           Sale[]
+  creditCustomers CreditCustomer[]
+}
+
+// ── Stock & Inventory ─────────────────────────────────────────────────────────
+model StockItem {
+  id            String   @id @default(cuid())
+  name          String
+  quantity      Float
+  buyPrice      Decimal
+  sellPrice     Decimal
+  currency      String   @default("USD")
+  reorderLevel  Float    @default(5)
+  business      Business @relation(fields: [businessId], references: [id])
+  businessId    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sales Sale[]
+}
+
+model Sale {
+  id          String    @id @default(cuid())
+  quantity    Float
+  totalAmount Decimal
+  currency    String    @default("USD")
+  paymentMode String    @default("cash") // cash, ecocash, zig, usd
+  business    Business  @relation(fields: [businessId], references: [id])
+  businessId  String
+  item        StockItem @relation(fields: [itemId], references: [id])
+  itemId      String
+  createdAt   DateTime  @default(now())
+}
+
+// ── Chikwereti (Credit Book) ───────────────────────────────────────────────────
+model CreditCustomer {
+  id         String   @id @default(cuid())
+  name       String
+  phone      String?
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId String
+  createdAt  DateTime @default(now())
+
+  entries CreditEntry[]
+}
+
+model CreditEntry {
+  id          String         @id @default(cuid())
+  description String
+  amount      Decimal
+  currency    String         @default("USD")
+  paid        Boolean        @default(false)
+  paidAt      DateTime?
+  dueDate     DateTime?
+  customer    CreditCustomer @relation(fields: [customerId], references: [id])
+  customerId  String
+  createdAt   DateTime       @default(now())
+}
