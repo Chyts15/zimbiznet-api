@@ -1,13 +1,16 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import businessRoutes from './modules/business/business.routes';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.json());
+
+// Routes
+app.use('/v1/businesses', businessRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -27,7 +30,6 @@ app.use((req, res) => {
     });
 });
 
-// Start server
 app.listen(PORT, () => {
     console.log(`ZimBizNet API running on port ${PORT}`);
     console.log(`Health check: http://localhost:${PORT}/health`);
