@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import businessRoutes from './modules/business/business.routes';
+import stockRoutes from './modules/stock/stock.routes';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use('/v1/businesses', businessRoutes);
+app.use('/v1/businesses/:businessId/stock', stockRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
